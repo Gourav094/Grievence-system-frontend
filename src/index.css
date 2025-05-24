@@ -1,0 +1,123 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 180 27% 98%;
+    --foreground: 180 8% 5%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 180 8% 5%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 180 8% 5%;
+
+    --primary: 175 70% 41%;
+    --primary-foreground: 180 27% 98%;
+
+    --secondary: 195 83% 44%;
+    --secondary-foreground: 180 27% 98%;
+
+    --muted: 180 5% 96%;
+    --muted-foreground: 180 5% 38%;
+
+    --accent: 180 5% 96%;
+    --accent-foreground: 180 8% 5%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 180 27% 98%;
+
+    --border: 180 16% 88%;
+    --input: 180 16% 88%;
+    --ring: 175 70% 41%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 175 70% 41%;
+    --sidebar-primary-foreground: 180 27% 98%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 175 70% 41%;
+  }
+
+  .dark {
+    --background: 180 8% 5%;
+    --foreground: 180 5% 96%;
+
+    --card: 180 7% 8%;
+    --card-foreground: 180 5% 96%;
+
+    --popover: 180 7% 8%;
+    --popover-foreground: 180 5% 96%;
+
+    --primary: 175 70% 41%;
+    --primary-foreground: 180 5% 96%;
+
+    --secondary: 195 83% 44%;
+    --secondary-foreground: 180 5% 96%;
+
+    --muted: 180 7% 13%;
+    --muted-foreground: 180 5% 66%;
+
+    --accent: 180 7% 13%;
+    --accent-foreground: 180 5% 96%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 180 5% 96%;
+
+    --border: 180 7% 13%;
+    --input: 180 7% 13%;
+    --ring: 175 70% 41%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.form-input-wrapper {
+  @apply relative mb-4;
+}
+
+.form-input {
+  @apply w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary;
+}
+
+.form-label {
+  @apply block mb-2 text-sm font-medium text-foreground;
+}
+
+.dashboard-card {
+  @apply relative overflow-hidden bg-card text-card-foreground rounded-lg border border-border shadow transition-all duration-200 hover:shadow-md hover:-translate-y-1;
+}
+
+.dashboard-card-icon {
+  @apply absolute top-4 right-4 opacity-10 text-primary text-5xl;
+}
+
+.grievance-status-pending {
+  @apply px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800;
+}
+
+.grievance-status-inprogress {
+  @apply px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800;
+}
+
+.grievance-status-resolved {
+  @apply px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800;
+}
+
+.grievance-status-rejected {
+  @apply px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800;
+}
