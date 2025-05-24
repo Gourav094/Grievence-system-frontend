@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import MainLayout from '@/components/Layout/MainLayout';
@@ -16,13 +16,30 @@ import {
   getAllGrievances, 
   getGrievancesByUser 
 } from '@/services/grievanceService';
+import { grievanceApi } from '@/services/api';
 
 const Dashboard = () => {
   const { user } = useAuth();
   console.log("user info from dashboard", user);
   // Get grievances based on user role
-  const grievances = user?.role === 'admin' ? getAllGrievances() : getGrievancesByUser(user?.email || '');
-  
+  // const grievances = user?.role === 'admin' ? getAllGrievances() : getGrievancesByUser(user?.email || '');
+  const [grievances, setGrievances] = React.useState([]);
+  useEffect(() => {
+    const fetchGrievances = async () => {
+      try {
+        const data = await grievanceApi.getAllGrievances();
+        console.log("Fetched grievances:", data);
+        setGrievances(data);
+      } catch (error) {
+        console.error("Error fetching grievances:", error);
+      }
+    };
+
+    fetchGrievances();
+  }
+  , []);
+
+  console.log("grievances from dashboard", grievances);
   const stats = {
     total: grievances.length,
     pending: grievances.filter(g => g.status === 'pending').length,
@@ -43,21 +60,23 @@ const Dashboard = () => {
       description: `${stats.pending} grievances waiting`,
       icon: <Clock size={32} />,
       link: "/grievances?status=pending",
-      color: "bg-gradient-to-br from-yellow-500 to-orange-400"
+      // color: "bg-gradient-to-br from-yellow-300 to-orange-400"
+      color: "bg-gradient-to-br from-[#fecf9f] via-[#fe7096] to-[#fd7cbf]"
+
     },
     {
       title: "In Progress",
       description: `${stats.inProgress} grievances`,
       icon: <AlertTriangle size={32} />,
       link: "/grievances?status=in-progress",
-      color: "bg-gradient-to-br from-blue-500 to-blue-700"
+      color: "bg-gradient-to-br from-blue-400 to-blue-500"
     },
     {
       title: "Resolved Cases",
       description: `${stats.resolved} grievances resolved`,
       icon: <CheckCircle size={32} />,
       link: "/grievances?status=resolved",
-      color: "bg-gradient-to-br from-green-500 to-green-700"
+      color: "bg-gradient-to-br from-green-300 to-blue-500"
     }
   ];
 
@@ -125,17 +144,22 @@ const Dashboard = () => {
                   <th className="px-4 py-3">ID</th>
                   <th className="px-4 py-3">Title</th>
                   <th className="px-4 py-3">User</th>
+                  <th className="px-4 py-3">Assigned to</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Created</th>
                   <th className="px-4 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {grievances.slice(0, 5).map((grievance) => (
+                {[...grievances]
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .slice(0, 5)
+                    .map((grievance) => (
                   <tr key={grievance.id} className="border-b border-border hover:bg-muted/50">
                     <td className="px-4 py-3">{grievance.id}</td>
                     <td className="px-4 py-3">{grievance.title}</td>
-                    <td className="px-4 py-3">{grievance.userName}</td>
+                    <td className="px-4 py-3">{grievance.createdBy}</td>
+                    <td className="px-4 py-3">{grievance.assignedTo}</td>
                     <td className="px-4 py-3">
                       <span className={`
                         ${grievance.status === 'pending' ? 'grievance-status-pending' : ''}
