@@ -49,9 +49,9 @@ export const authApi = {
 
 // Grievance APIs
 export const grievanceApi = {
-  getAllGrievances: async () => {
+  getAllGrievances: async (username) => {
     try {
-      const response = await api.get('/api/forum/grievances');
+      const response = await api.get(`/api/forum/grievances/filter?status=open&createdBy=${username}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching grievances:', error);
