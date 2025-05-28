@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -26,6 +25,7 @@ const GrievanceForm = () => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [createdBy, setCreatedBy] = useState(user?.name || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -33,7 +33,7 @@ const GrievanceForm = () => {
     e.preventDefault();
     setFormError('');
 
-    if (!title || !category || !description) {
+    if (!title || !category || !description || !createdBy) {
       setFormError('Please fill in all required fields');
       return;
     }
@@ -52,9 +52,10 @@ const GrievanceForm = () => {
         category,
         status: 'pending',
         userId: user.id,
-        userName: user.name
+        userName: user.name,
+        createdBy:user.name // ✅ New field included
       };
-      
+
       const response = await grievanceApi.createGrievance(grievanceData);
 
       toast({
@@ -136,6 +137,22 @@ const GrievanceForm = () => {
                 className="form-input min-h-[150px]"
                 placeholder="Provide detailed information about your grievance"
                 disabled={isSubmitting}
+              />
+            </div>
+
+            <div className="form-input-wrapper">
+              <label htmlFor="createdBy" className="form-label">
+                Created By <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="createdBy"
+                type="text"
+                value={createdBy}
+                onChange={(e) => setCreatedBy(e.target.value)}
+                className="form-input"
+                placeholder="Enter your name"
+                disabled={isSubmitting}
+                readOnly // Optional: remove if user should be allowed to edit
               />
             </div>
 
