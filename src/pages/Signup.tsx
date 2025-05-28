@@ -39,7 +39,7 @@ const Signup = () => {
     
     try {
       const success = await signup(name, email, password);
-      
+      console.log("success from signup --> ", success);
       if (success) {
         toast({
           title: "Registration successful!",
@@ -47,6 +47,7 @@ const Signup = () => {
         });
         navigate('/dashboard');
       } else {
+        console.log("error from signup --> ", authError);
         setFormError(authError || 'This email is already registered. Please use a different email or login.');
       }
     } catch (error) {

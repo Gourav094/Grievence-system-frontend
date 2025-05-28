@@ -21,9 +21,9 @@ const GrievanceTrack = () => {
     }
 
     const grievance = getGrievanceById(grievanceId.trim());
-    
-    if (grievance) {
-      navigate(`/grievances/${grievance.id}`);
+    // console.log("grievance from track --> ", grievanceId);
+    if (grievanceId) {
+      navigate(`/grievances/${grievanceId}`);
     } else {
       setError('Grievance not found. Please check the ID and try again.');
     }
