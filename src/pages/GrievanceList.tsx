@@ -10,6 +10,7 @@ import { Search, FileText, Filter } from 'lucide-react';
 
 const GrievanceList = () => {
   const { user } = useAuth();
+
   const [searchParams] = useSearchParams();
   const statusFilter = searchParams.get('status') as GrievanceStatus | null;
 
@@ -18,7 +19,7 @@ const GrievanceList = () => {
 
   const { data: grievances = [], isLoading, error } = useQuery({
     queryKey: ['grievances'],
-    queryFn: () => grievanceApi.getAllGrievances(),
+    queryFn: () => grievanceApi.getAllGrievances(user.name),
   });
 
   const filteredGrievances = useMemo(() => {
