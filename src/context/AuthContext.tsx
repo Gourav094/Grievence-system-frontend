@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authApi } from '@/services/api';
 import Cookies from 'js-cookie';
@@ -7,6 +6,7 @@ interface User {
   name: string;
   email: string;
   role?: 'admin' | 'user';
+  id: string; // Added id property to User interface
 }
 
 interface AuthContextType {
@@ -72,6 +72,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         name: response.username, // Use `username` from the response
         email: response.email,
         role: response.role,
+        id: response.id, // Added id property from response
     };
 
     localStorage.setItem('user', JSON.stringify(userData));

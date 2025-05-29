@@ -368,7 +368,7 @@ const GrievanceDetail = () => {
                           <p className="text-sm whitespace-pre-line break-words mt-1 text-gray-700">{comment.comment}</p>
                         )}
                       </div>
-                      {(user?.role === 'admin' || comment.userName === user?.name) && (
+                      {(user?.role === 'admin'|| 'user' || comment.userName === user?.name) && (
                         <div className="flex flex-col sm:flex-row gap-2 items-center ml-3 mt-1">
                           <Button
                             variant="ghost"
