@@ -18,8 +18,12 @@ const GrievanceList = () => {
   const [currentStatus, setCurrentStatus] = useState<GrievanceStatus | 'all'>(statusFilter || 'all');
 
   const { data: grievances = [], isLoading, error } = useQuery({
-    queryKey: ['grievances'],
-    queryFn: () => grievanceApi.getAllGrievances(user.name),
+    queryKey: ['grievances', user?.role],
+    queryFn: () =>
+      user?.role === 'admin'
+        ? grievanceApi.getAllGrievances() // admin: fetch all
+        : grievanceApi.getAllGrievances(user.name), // user: only their grievances
+    enabled: !!user,
   });
 
   const filteredGrievances = useMemo(() => {

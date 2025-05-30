@@ -50,10 +50,9 @@ const GrievanceForm = () => {
         title,
         description,
         category,
-        status: 'pending',
-        userId: user.id,
+        status: 'OPEN', // Set status to OPEN by default
         userName: user.name,
-        createdBy:user.name // ✅ New field included
+        createdBy: user.name
       };
 
       const response = await grievanceApi.createGrievance(grievanceData);

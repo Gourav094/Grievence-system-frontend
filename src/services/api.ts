@@ -1,6 +1,6 @@
-
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { updateGrievance } from './grievanceService';
 
 // Create an axios instance with default config
 const api = axios.create({
@@ -49,10 +49,15 @@ export const authApi = {
 
 // Grievance APIs
 export const grievanceApi = {
-  getAllGrievances: async (username) => {
+  getAllGrievances: async (username?: string) => {
     try {
-      const response = await api.get(`/api/forum/grievances/filter?status=open&createdBy=${username}`);
-      return response.data;
+      if (username) {
+        const response = await api.get(`/api/forum/grievances/filter?status=pending&createdBy=${username}`);
+        return response.data;
+      } else {
+        const response = await api.get('/api/forum/grievances');
+        return response.data;
+      }
     } catch (error) {
       console.error('Error fetching grievances:', error);
       throw error;
@@ -78,10 +83,21 @@ export const grievanceApi = {
       throw error;
     }
   },
+
+  updateGrievance: async (id: string, updateData: any) => {
+    try {
+      const response = await api.put(`/api/forum/grievances/${id}`, updateData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating grievance ${id}:`, error);
+      throw error;
+    }
+  },
   
   addComment: async (commentData: any) => {
     try {
-      const response = await api.post('/api/forum/add-comment', commentData);
+      const { grievanceId, ...rest } = commentData;
+      const response = await api.post(`/api/comments?grievanceId=${grievanceId}`, rest);
       return response.data;
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -89,6 +105,26 @@ export const grievanceApi = {
     }
   },
   
+  updateComment: async ({ id, text }: { id: string; text: string }) => {
+    try {
+      const response = await api.put(`/api/comments/${id}`, { comment: text });
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating comment ${id}:`, error);
+      throw error;
+    }
+  },
+
+  deleteComment: async (id: string) => {
+    try {
+      const response = await api.delete(`/api/comments/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting comment ${id}:`, error);
+      throw error;
+    }
+  },
+
   searchGrievances: async (query: string) => {
     try {
       const response = await api.get(`/api/forum/search?query=${query}`);
