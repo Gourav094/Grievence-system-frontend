@@ -104,7 +104,7 @@ const GrievanceList = () => {
         </div>
       ) : error ? (
         <div className="bg-red-50 p-4 rounded-lg text-red-700 mb-6">
-          Failed to load grievances. Please try again later.
+          No Grievance Found. Please create one to see the details.
         </div>
       ) : (
         <div className="bg-card rounded-lg shadow border border-border overflow-hidden">

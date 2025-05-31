@@ -312,7 +312,7 @@ const Dashboard = () => {
             {isLoading ? (
               <div className="p-8 text-center text-lg">Loading grievances...</div>
             ) : error ? (
-              <div className="p-8 text-center text-red-600">Failed to load grievances.</div>
+              <div className="p-8 text-center text-red-600">No Grievance Found.</div>
             ) : (
               <table className="w-full text-left min-w-[900px]">
                 <thead>
