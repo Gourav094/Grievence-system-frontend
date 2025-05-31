@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import MainLayout from '@/components/Layout/MainLayout';
@@ -10,42 +9,73 @@ import {
   Clock, 
   CheckCircle, 
   Users, 
-  AlertTriangle 
+  AlertTriangle,
+  Eye,
+  UserPlus,
+  BarChart3,
+  PieChart
 } from 'lucide-react';
 import { 
   getAllGrievances, 
   getGrievancesByUser 
 } from '@/services/grievanceService';
 import { grievanceApi } from '@/services/api';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  console.log("user info from dashboard", user);
-  // Get grievances based on user role
-  // const grievances = user?.role === 'admin' ? getAllGrievances() : getGrievancesByUser(user?.email || '');
-  const [grievances, setGrievances] = React.useState([]);
-  useEffect(() => {
-    const fetchGrievances = async () => {
-      try {
-        const data = await grievanceApi.getAllGrievances();
-        console.log("Fetched grievances:", data);
-        setGrievances(data);
-      } catch (error) {
-        console.error("Error fetching grievances:", error);
-      }
-    };
+  // Use React Query for grievances
+  const {
+    data: grievances = [],
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ['grievances', user?.role, user?.name],
+    queryFn: () =>
+      user?.role === 'admin'
+        ? grievanceApi.getAllGrievances()
+        : grievanceApi.getAllGrievances(user?.name),
+    enabled: !!user,
+  });
 
-    fetchGrievances();
-  }
-  , []);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [statusFilter, setStatusFilter] = React.useState('');
 
-  console.log("grievances from dashboard", grievances);
+  // Filtered grievances for admin table
+  const filteredGrievances = React.useMemo(() => {
+    return grievances.filter((g) => {
+      const matchesSearch =
+        !searchTerm ||
+        g.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        g.createdBy?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = !statusFilter || g.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [grievances, searchTerm, statusFilter]);
+
   const stats = {
     total: grievances.length,
     pending: grievances.filter(g => g.status === 'pending').length,
     inProgress: grievances.filter(g => g.status === 'in-progress').length,
     resolved: grievances.filter(g => g.status === 'resolved').length
   };
+
+  // Pie chart data for status distribution
+  const pieData = [
+    { label: 'Pending', value: stats.pending, color: '#fde047' },
+    { label: 'In Progress', value: stats.inProgress, color: '#60a5fa' },
+    { label: 'Resolved', value: stats.resolved, color: '#4ade80' },
+    { label: 'Rejected', value: grievances.filter(g => g.status === 'rejected').length, color: '#f87171' },
+  ];
+  const totalPie = pieData.reduce((sum, d) => sum + d.value, 0);
 
   const adminCards = [
     {
@@ -106,11 +136,42 @@ const Dashboard = () => {
 
   const cards = user?.role === 'admin' ? adminCards : userCards;
 
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [selectedGrievance, setSelectedGrievance] = useState(null);
+  const [assignTo, setAssignTo] = useState('');
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [assignError, setAssignError] = useState('');
+
+  // Dummy admin list for assignment (replace with real API in production)
+  const adminList = [
+    { name: 'John Doe', email: 'john@example.com' },
+    { name: 'Jane Smith', email: 'jane@example.com' },
+  ];
+
+  // Assign handler (replace with real API call)
+  const handleAssign = async () => {
+    setAssignLoading(true);
+    setAssignError('');
+    try {
+      // await grievanceApi.assignGrievance(selectedGrievance.id, assignTo);
+      setTimeout(() => {
+        setAssignLoading(false);
+        setAssignModalOpen(false);
+        setAssignTo('');
+        setSelectedGrievance(null);
+        // Optionally refetch grievances or show a toast
+      }, 1000);
+    } catch (e) {
+      setAssignError('Failed to assign.');
+      setAssignLoading(false);
+    }
+  };
+
   return (
     <MainLayout requireAuth>
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">Welcome, {user?.name}</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-4xl font-extrabold mb-2 tracking-tight text-primary drop-shadow">Welcome, {user?.name}</h1>
+        <p className="text-lg text-muted-foreground mb-2">
           {user?.role === 'admin' 
             ? "Manage and respond to user grievances from your admin dashboard"
             : "Submit and track your grievances in one place"
@@ -118,85 +179,249 @@ const Dashboard = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {cards.map((card, index) => (
-          <Link to={card.link} key={index}>
-            <div className={`dashboard-card p-6 text-white ${card.color}`}>
-              <div className="dashboard-card-icon">
-                {card.icon}
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-xl font-bold mb-2">{card.title}</h3>
-                <p className="text-white/90">{card.description}</p>
-              </div>
+      {/* --- Analytics Section --- */}
+      {user?.role === 'admin' && (
+        <section className="mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Analytics Card (commented out as per request)
+            <div className="bg-white rounded-2xl shadow-xl border border-border p-8 flex flex-col gap-6 items-center relative overflow-hidden">
+              ...existing analytics card code...
             </div>
-          </Link>
-        ))}
+            */}
+            {/* Recent Activity Feed removed as per previous request */}
+          </div>
+        </section>
+      )}
+
+      {/* User summary row with call-to-action */}
+      {user?.role !== 'admin' && (
+        <>
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl shadow p-6 flex flex-col items-center border border-border">
+              <ListChecks className="text-primary mb-2" size={36} />
+              <div className="text-2xl font-bold">{stats.total}</div>
+              <div className="text-muted-foreground">Total Grievances</div>
+            </div>
+            <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl shadow p-6 flex flex-col items-center border border-border">
+              <AlertTriangle className="text-yellow-600 mb-2" size={36} />
+              <div className="text-2xl font-bold">{stats.inProgress}</div>
+              <div className="text-muted-foreground">In Progress</div>
+            </div>
+            <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-xl shadow p-6 flex flex-col items-center border border-border">
+              <CheckCircle className="text-green-600 mb-2" size={36} />
+              <div className="text-2xl font-bold">{stats.resolved}</div>
+              <div className="text-muted-foreground">Resolved</div>
+            </div>
+          </div>
+          <div className="mb-10 flex flex-col md:flex-row gap-4 items-center justify-center">
+            <Link to="/grievances/new" className="inline-block">
+              <button className="bg-primary text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-primary/90 transition">+ Submit New Grievance</button>
+            </Link>
+            <Link to="/grievances" className="inline-block">
+              <button className="bg-muted text-primary px-6 py-3 rounded-lg font-semibold shadow hover:bg-muted/80 border border-primary transition">View My Grievances</button>
+            </Link>
+          </div>
+        </>
+      )}
+
+      {/* Card grid remains for both roles */}
+      <div className="mb-12">
+        <h2 className="text-xl font-bold mb-4 text-primary/90">Quick Actions & Stats</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {cards.map((card, index) => (
+            <Link to={card.link} key={index} className="focus:outline-none">
+              <div className={`relative group rounded-2xl p-7 shadow-lg border border-border bg-gradient-to-br ${card.color} transition-transform duration-200 hover:scale-105 hover:shadow-2xl overflow-hidden`}>
+                <div className="absolute right-4 top-4 opacity-10 text-[80px] pointer-events-none select-none">
+                  {card.icon}
+                </div>
+                <div className="relative z-10 flex flex-col items-start">
+                  <div className="mb-4 flex items-center justify-center w-12 h-12 rounded-full bg-white/80 shadow">
+                    {React.cloneElement(card.icon, { size: 32, className: 'text-primary' })}
+                  </div>
+                  <h3 className="text-2xl font-bold mb-1 text-white drop-shadow-lg">{card.title}</h3>
+                  <p className="text-white/90 text-base font-medium drop-shadow">{card.description}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
 
+      {/* Admin: Modern Grievance Table with Filters and Actions */}
       {user?.role === 'admin' && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4">Recent Grievances</h2>
-          <div className="bg-card rounded-lg shadow border border-border overflow-hidden">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-muted">
-                  <th className="px-4 py-3">ID</th>
-                  <th className="px-4 py-3">Title</th>
-                  <th className="px-4 py-3">User</th>
-                  <th className="px-4 py-3">Assigned to</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Created</th>
-                  <th className="px-4 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...grievances]
+        <div className="mt-10">
+          {/* Dashboard enhancement: Analytics bar */}
+          <div className="flex flex-col gap-2 mb-6">
+            <div className="flex items-center gap-2 bg-muted rounded-lg px-4 py-2 shadow">
+              <BarChart3 className="text-primary" size={20} />
+              <span className="font-semibold">Analytics:</span>
+              <span className="inline-flex items-center gap-1 text-xs font-medium bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pending: {stats.pending}</span>
+              <span className="inline-flex items-center gap-1 text-xs font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded">In Progress: {stats.inProgress}</span>
+              <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded">Resolved: {stats.resolved}</span>
+              <span className="inline-flex items-center gap-1 text-xs font-medium bg-red-100 text-red-800 px-2 py-1 rounded">Rejected: {grievances.filter(g => g.status === 'rejected').length}</span>
+            </div>
+            {/* Horizontal bar chart visualization */}
+            <div className="w-full max-w-xl bg-gray-100 rounded h-4 flex overflow-hidden border border-border mt-2">
+              <div
+                className="bg-yellow-300 h-4 transition-all duration-500"
+                style={{ width: `${stats.total ? (stats.pending / stats.total) * 100 : 0}%` }}
+                title={`Pending: ${stats.pending}`}
+              />
+              <div
+                className="bg-blue-400 h-4 transition-all duration-500"
+                style={{ width: `${stats.total ? (stats.inProgress / stats.total) * 100 : 0}%` }}
+                title={`In Progress: ${stats.inProgress}`}
+              />
+              <div
+                className="bg-green-400 h-4 transition-all duration-500"
+                style={{ width: `${stats.total ? (stats.resolved / stats.total) * 100 : 0}%` }}
+                title={`Resolved: ${stats.resolved}`}
+              />
+              <div
+                className="bg-red-400 h-4 transition-all duration-500"
+                style={{ width: `${stats.total ? (grievances.filter(g => g.status === 'rejected').length / stats.total) * 100 : 0}%` }}
+                title={`Rejected: ${grievances.filter(g => g.status === 'rejected').length}`}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+            <h2 className="text-2xl font-bold">All Grievances</h2>
+            <div className="flex gap-2 flex-wrap">
+              <input
+                type="text"
+                placeholder="Search by title or user..."
+                className="border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+              <select
+                className="border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+              >
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="in-progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              {/* Add more filters if needed */}
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow border border-border overflow-x-auto">
+            {isLoading ? (
+              <div className="p-8 text-center text-lg">Loading grievances...</div>
+            ) : error ? (
+              <div className="p-8 text-center text-red-600">Failed to load grievances.</div>
+            ) : (
+              <table className="w-full text-left min-w-[900px]">
+                <thead>
+                  <tr className="bg-muted text-muted-foreground text-sm">
+                    <th className="px-4 py-3 font-semibold">ID</th>
+                    <th className="px-4 py-3 font-semibold">Title</th>
+                    <th className="px-4 py-3 font-semibold">User</th>
+                    <th className="px-4 py-3 font-semibold">Assigned to</th>
+                    <th className="px-4 py-3 font-semibold">Status</th>
+                    <th className="px-4 py-3 font-semibold">Created</th>
+                    <th className="px-4 py-3 font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...filteredGrievances]
                     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                    .slice(0, 5)
                     .map((grievance) => (
-                  <tr key={grievance.id} className="border-b border-border hover:bg-muted/50">
-                    <td className="px-4 py-3">{grievance.id}</td>
-                    <td className="px-4 py-3">{grievance.title}</td>
-                    <td className="px-4 py-3">{grievance.createdBy}</td>
-                    <td className="px-4 py-3">{grievance.assignedTo}</td>
-                    <td className="px-4 py-3">
-                      <span className={`
-                        ${grievance.status === 'pending' ? 'grievance-status-pending' : ''}
-                        ${grievance.status === 'in-progress' ? 'grievance-status-inprogress' : ''}
-                        ${grievance.status === 'resolved' ? 'grievance-status-resolved' : ''}
-                        ${grievance.status === 'rejected' ? 'grievance-status-rejected' : ''}
-                      `}>
-                        {grievance.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {new Date(grievance.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link 
-                        to={`/grievances/${grievance.id}`}
-                        className="text-primary hover:underline"
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-                {grievances.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                      No grievances found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      <tr key={grievance.id} className="border-b border-border hover:bg-blue-50 transition">
+                        <td className="px-4 py-3 font-mono text-xs">{grievance.id}</td>
+                        <td className="px-4 py-3 font-medium max-w-[200px] truncate">{grievance.title}</td>
+                        <td className="px-4 py-3">{grievance.createdBy}</td>
+                        <td className="px-4 py-3">{grievance.assignedTo || <span className='text-muted-foreground'>Unassigned</span>}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-semibold 
+                            ${grievance.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : ''}
+                            ${grievance.status === 'in-progress' ? 'bg-blue-100 text-blue-800' : ''}
+                            ${grievance.status === 'resolved' ? 'bg-green-100 text-green-800' : ''}
+                            ${grievance.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
+                          `}>
+                            {grievance.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs">{new Date(grievance.createdAt).toLocaleDateString()}</td>
+                        <td className="px-4 py-3 flex gap-2">
+                          <Link to={`/grievances/${grievance.id}`} className="text-primary hover:scale-110 transition" title="View">
+                            <Eye size={20} />
+                          </Link>
+                          <button
+                            className="text-blue-600 hover:scale-110 transition"
+                            title="Assign"
+                            onClick={() => { setSelectedGrievance(grievance); setAssignModalOpen(true); }}
+                          >
+                            <UserPlus size={20} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  {filteredGrievances.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                        No grievances found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}
+
+      {/* Assign Modal */}
+      <Dialog open={assignModalOpen} onOpenChange={setAssignModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Grievance</DialogTitle>
+            <DialogDescription>
+              Assign this grievance to an admin for resolution.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mb-4">
+            <div className="font-semibold mb-2">Grievance: <span className="text-primary">{selectedGrievance?.title}</span></div>
+            <label className="block mb-2 text-sm">Assign to:</label>
+            <select
+              className="w-full border rounded px-3 py-2"
+              value={assignTo}
+              onChange={e => setAssignTo(e.target.value)}
+            >
+              <option value="">Select admin</option>
+              {adminList.map(admin => (
+                <option key={admin.email} value={admin.name}>{admin.name}</option>
+              ))}
+            </select>
+            {assignError && <div className="text-red-600 text-xs mt-2">{assignError}</div>}
+          </div>
+          <DialogFooter>
+            <button className="px-4 py-2 rounded bg-muted" onClick={() => setAssignModalOpen(false)} disabled={assignLoading}>Cancel</button>
+            <button className="px-4 py-2 rounded bg-primary text-white" onClick={handleAssign} disabled={assignLoading || !assignTo}>
+              {assignLoading ? 'Assigning...' : 'Assign'}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 };
 
 export default Dashboard;
+
+/*
+// --- Suggestions for further dashboard UI enhancements ---
+// 1. Recent Activity Feed: Show latest grievance updates, assignments, or comments.
+// 2. Quick Actions: Buttons for common admin tasks (e.g., Assign All, Export CSV, Bulk Status Update).
+// 3. Notifications/Alerts: Banner for unresolved or overdue grievances.
+// 4. User Leaderboard: Top users by number of grievances submitted/resolved.
+// 5. Trends Chart: Line or bar chart showing grievances over time (week/month).
+// 6. Export/Download: Button to export grievances as CSV/Excel.
+// 7. Customizable Widgets: Allow admins to add/remove dashboard widgets.
+// 8. Filter by Date Range: Add date pickers to filter grievances by creation date.
+// 9. Status Pie Chart: Visualize status distribution as a pie chart.
+// 10. Assign Modal: Modal dialog for assigning grievances to admins.
+*/
