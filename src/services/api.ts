@@ -52,7 +52,7 @@ export const grievanceApi = {
   getAllGrievances: async (username?: string) => {
     try {
       if (username) {
-        const response = await api.get(`/api/forum/grievances/filter?status=open&createdBy=${username}`);
+        const response = await api.get(`/api/forum/grievances/filter?status=pending&createdBy=${username}`);
         return response.data;
       } else {
         const response = await api.get('/api/forum/grievances');
