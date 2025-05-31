@@ -89,7 +89,7 @@ const GrievanceList = () => {
               className="form-input py-2 px-3 rounded-md border border-border text-sm"
             >
               <option value="all">All Status</option>
-              <option value="pending">Pending</option>
+              <option value="open">Open</option>
               <option value="in-progress">In Progress</option>
               <option value="resolved">Resolved</option>
               <option value="rejected">Rejected</option>
@@ -134,7 +134,7 @@ const GrievanceList = () => {
                     <td className="px-4 py-3">{grievance.category}</td>
                     <td className="px-4 py-3">
                       <span className={`
-                        ${grievance.status === 'pending' ? 'grievance-status-pending' : ''}
+                        ${grievance.status === 'open' ? 'grievance-status-open' : ''}
                         ${grievance.status === 'in-progress' ? 'grievance-status-inprogress' : ''}
                         ${grievance.status === 'resolved' ? 'grievance-status-resolved' : ''}
                         ${grievance.status === 'rejected' ? 'grievance-status-rejected' : ''}

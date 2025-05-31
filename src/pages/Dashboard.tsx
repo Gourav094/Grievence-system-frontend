@@ -63,14 +63,14 @@ const Dashboard = () => {
 
   const stats = {
     total: grievances.length,
-    pending: grievances.filter(g => g.status === 'pending').length,
+    open: grievances.filter(g => g.status === 'open').length,
     inProgress: grievances.filter(g => g.status === 'in-progress').length,
     resolved: grievances.filter(g => g.status === 'resolved').length
   };
 
   // Pie chart data for status distribution
   const pieData = [
-    { label: 'Pending', value: stats.pending, color: '#fde047' },
+    { label: 'open', value: stats.open, color: '#fde047' },
     { label: 'In Progress', value: stats.inProgress, color: '#60a5fa' },
     { label: 'Resolved', value: stats.resolved, color: '#4ade80' },
     { label: 'Rejected', value: grievances.filter(g => g.status === 'rejected').length, color: '#f87171' },
@@ -86,10 +86,10 @@ const Dashboard = () => {
       color: "bg-gradient-to-br from-primary to-blue-400"
     },
     {
-      title: "Pending Review",
-      description: `${stats.pending} grievances waiting`,
+      title: "Open Review",
+      description: `${stats.open} grievances waiting`,
       icon: <Clock size={32} />,
-      link: "/grievances?status=pending",
+      link: "/grievances?status=open",
       // color: "bg-gradient-to-br from-yellow-300 to-orange-400"
       color: "bg-gradient-to-br from-[#fecf9f] via-[#fe7096] to-[#fd7cbf]"
 
@@ -255,7 +255,7 @@ const Dashboard = () => {
             <div className="flex items-center gap-2 bg-muted rounded-lg px-4 py-2 shadow">
               <BarChart3 className="text-primary" size={20} />
               <span className="font-semibold">Analytics:</span>
-              <span className="inline-flex items-center gap-1 text-xs font-medium bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pending: {stats.pending}</span>
+              <span className="inline-flex items-center gap-1 text-xs font-medium bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Open: {stats.open}</span>
               <span className="inline-flex items-center gap-1 text-xs font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded">In Progress: {stats.inProgress}</span>
               <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-100 text-green-800 px-2 py-1 rounded">Resolved: {stats.resolved}</span>
               <span className="inline-flex items-center gap-1 text-xs font-medium bg-red-100 text-red-800 px-2 py-1 rounded">Rejected: {grievances.filter(g => g.status === 'rejected').length}</span>
@@ -264,8 +264,8 @@ const Dashboard = () => {
             <div className="w-full max-w-xl bg-gray-100 rounded h-4 flex overflow-hidden border border-border mt-2">
               <div
                 className="bg-yellow-300 h-4 transition-all duration-500"
-                style={{ width: `${stats.total ? (stats.pending / stats.total) * 100 : 0}%` }}
-                title={`Pending: ${stats.pending}`}
+                style={{ width: `${stats.total ? (stats.open / stats.total) * 100 : 0}%` }}
+                title={`Open: ${stats.open}`}
               />
               <div
                 className="bg-blue-400 h-4 transition-all duration-500"
@@ -300,7 +300,7 @@ const Dashboard = () => {
                 onChange={e => setStatusFilter(e.target.value)}
               >
                 <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
+                <option value="open">Open</option>
                 <option value="in-progress">In Progress</option>
                 <option value="resolved">Resolved</option>
                 <option value="rejected">Rejected</option>
@@ -337,7 +337,7 @@ const Dashboard = () => {
                         <td className="px-4 py-3">{grievance.assignedTo || <span className='text-muted-foreground'>Unassigned</span>}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-block px-2 py-1 rounded text-xs font-semibold 
-                            ${grievance.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : ''}
+                            ${grievance.status === 'open' ? 'bg-yellow-100 text-yellow-800' : ''}
                             ${grievance.status === 'in-progress' ? 'bg-blue-100 text-blue-800' : ''}
                             ${grievance.status === 'resolved' ? 'bg-green-100 text-green-800' : ''}
                             ${grievance.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
