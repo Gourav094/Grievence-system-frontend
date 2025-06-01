@@ -86,7 +86,8 @@ export const grievanceApi = {
 
   updateGrievance: async (id: string, updateData: any) => {
     try {
-      const response = await api.put(`/api/forum/grievances/${id}`, updateData);
+      const response = await api.patch(`/api/forum/${id}`, updateData);
+      console.log('Grievance updated:', response.data, "from: ", updateData);
       return response.data;
     } catch (error) {
       console.error(`Error updating grievance ${id}:`, error);

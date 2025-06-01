@@ -47,11 +47,7 @@ const GrievanceDetail = () => {
   // Status update mutation
   const updateStatusMutation = useMutation({
     mutationFn: (newStatus: GrievanceStatus) => {
-      return grievanceApi.createGrievance({ 
-        ...grievance,
-        id: grievance.id,
-        status: newStatus 
-      });
+      return grievanceApi.updateGrievance(grievance.id, { status: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['grievance', id] });
@@ -252,9 +248,13 @@ const GrievanceDetail = () => {
                   <Clock className="mr-1 h-4 w-4" />
                   {new Date(grievance.createdAt).toLocaleTimeString()}
                 </span>
+                <span className="flex items-center">
+                  <User className="mr-1 h-4 w-4" />
+                  Assigned To: {grievance.assignedTo || "Unassigned"}
+              </span>
               </div>
             </div>
-            <div>
+            <div className="flex flex-col items-center gap-2">
               <span className={`
                 ${grievance.status === 'open' ? 'grievance-status-open' : ''}
                 ${grievance.status === 'in-progress' ? 'grievance-status-inprogress' : ''}

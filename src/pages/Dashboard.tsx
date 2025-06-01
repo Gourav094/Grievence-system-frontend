@@ -30,8 +30,11 @@ import {
   DialogDescription
 } from '@/components/ui/dialog';
 
+import { useToast } from '@/hooks/use-toast';
+
 const Dashboard = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   // Use React Query for grievances
   const {
     data: grievances = [],
@@ -153,14 +156,19 @@ const Dashboard = () => {
     setAssignLoading(true);
     setAssignError('');
     try {
-      // await grievanceApi.assignGrievance(selectedGrievance.id, assignTo);
-      setTimeout(() => {
-        setAssignLoading(false);
-        setAssignModalOpen(false);
-        setAssignTo('');
-        setSelectedGrievance(null);
-        // Optionally refetch grievances or show a toast
-      }, 1000);
+
+      await grievanceApi.updateGrievance(selectedGrievance.id, { assignedTo: assignTo });
+      setAssignLoading(false);
+      setAssignModalOpen(false);
+      setAssignTo('');
+      setSelectedGrievance(null);
+      // Optionally refetch grievances or show a toast
+
+      toast({
+        description: `Grievance has been successfully assigned to ${assignTo}.`,
+      });
+
+
     } catch (e) {
       setAssignError('Failed to assign.');
       setAssignLoading(false);
@@ -415,7 +423,7 @@ const Dashboard = () => {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-xs">{new Date(grievance.createdAt).toLocaleDateString()}</td>
-                        <td className="px-4 py-3 flex gap-2">
+                        <td className="px-4 py-3 flex gap-5">
                           <Link to={`/grievances/${grievance.id}`} className="text-primary hover:scale-110 transition duration-0" title="View">
                             <Eye size={20} />
                           </Link>
