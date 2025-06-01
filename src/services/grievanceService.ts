@@ -1,7 +1,7 @@
 
 // Mock database service for grievances
 
-export type GrievanceStatus = "pending" | "in-progress" | "resolved" | "rejected";
+export type GrievanceStatus = "open" | "in-progress" | "resolved" | "rejected";
 
 export interface Grievance {
   id: string;
@@ -32,7 +32,7 @@ let MOCK_GRIEVANCES: Grievance[] = [
     title: "Internet Service Disruption",
     description: "My internet service has been down for 3 days and I haven't received any support.",
     category: "Service",
-    status: "pending",
+    status: "open",
     userId: "user-1",
     userName: "Regular User",
     createdAt: "2025-05-01T10:30:00Z",

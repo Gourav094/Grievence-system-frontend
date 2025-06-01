@@ -50,7 +50,7 @@ const GrievanceForm = () => {
         title,
         description,
         category,
-        status: 'pending',
+        status: 'open',
         userName: user.name,
         createdBy:user.name // ✅ New field included
 

@@ -256,7 +256,7 @@ const GrievanceDetail = () => {
             </div>
             <div>
               <span className={`
-                ${grievance.status === 'pending' ? 'grievance-status-pending' : ''}
+                ${grievance.status === 'open' ? 'grievance-status-open' : ''}
                 ${grievance.status === 'in-progress' ? 'grievance-status-inprogress' : ''}
                 ${grievance.status === 'resolved' ? 'grievance-status-resolved' : ''}
                 ${grievance.status === 'rejected' ? 'grievance-status-rejected' : ''}
@@ -285,11 +285,11 @@ const GrievanceDetail = () => {
               <h2 className="text-lg font-medium mb-4">Update Status</h2>
               <div className="flex flex-wrap gap-2">
                 <Button
-                  variant={grievance.status === 'pending' ? 'default' : 'outline'}
-                  onClick={() => handleStatusChange('pending')}
+                  variant={grievance.status === 'open' ? 'default' : 'outline'}
+                  onClick={() => handleStatusChange('open')}
                   disabled={updateStatusMutation.isPending}
                 >
-                  Pending
+                  Open
                 </Button>
                 <Button
                   variant={grievance.status === 'in-progress' ? 'default' : 'outline'}
