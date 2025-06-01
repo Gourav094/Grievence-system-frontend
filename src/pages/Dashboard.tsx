@@ -347,11 +347,11 @@ const Dashboard = () => {
                         </td>
                         <td className="px-4 py-3 text-xs">{new Date(grievance.createdAt).toLocaleDateString()}</td>
                         <td className="px-4 py-3 flex gap-2">
-                          <Link to={`/grievances/${grievance.id}`} className="text-primary hover:scale-110 transition" title="View">
+                          <Link to={`/grievances/${grievance.id}`} className="text-primary hover:scale-110 transition duration-0" title="View">
                             <Eye size={20} />
                           </Link>
                           <button
-                            className="text-blue-600 hover:scale-110 transition"
+                            className="text-blue-600 hover:scale-110 transition duration-0"
                             title="Assign"
                             onClick={() => { setSelectedGrievance(grievance); setAssignModalOpen(true); }}
                           >
