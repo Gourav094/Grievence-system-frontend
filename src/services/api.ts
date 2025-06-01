@@ -24,11 +24,11 @@ api.interceptors.request.use(
 
 // Auth APIs
 export const authApi = {
-  login: async (email: string, password: string, role?: any) => {
+  login: async (email: string, password: string, role?: any, captchaToken?: string) => {
     try {
-      console.log('Login API called with email:', email, 'and password:', password, role);
+      console.log('Login API called with email:', email, 'and password:', password, role, 'captchaToken:', captchaToken);
       
-      const response = await api.post('/api/auth/login', { email, password, role });
+      const response = await api.post('/api/auth/login', { email, password, role, captchaToken });
       return response.data;
     } catch (error) {
       console.error('Login error:', error);

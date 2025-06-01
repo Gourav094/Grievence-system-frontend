@@ -13,8 +13,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string, role?: 'admin' | 'user') => Promise<boolean>;
-  signup: (name: string, email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, role?: 'admin' | 'user', captchaToken?: string) => Promise<boolean>;
+  signup: (name: string, email: string, password: string) => Promise<any>;
   logout: () => void;
 }
 
@@ -48,36 +48,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string, role:string): Promise<boolean> => {
+  const login = async (email: string, password: string, role?: string, captchaToken?: string): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
-    
-    try {
-      const regToken = Cookies.get('auth_token');
-      console.log('Registration token:', regToken);
 
-      const response = await authApi.login(email, password,role);
+    try {
+      const response = await authApi.login(email, password, role, captchaToken);
 
       if (response.token) {
-        // Extract token (removing 'Bearer ' if present)
-        const token = response.token.startsWith('Bearer ') 
-          ? response.token.substring(7) 
+        const token = response.token.startsWith('Bearer ')
+          ? response.token.substring(7)
           : response.token;
 
-      // Store the token in a cookie
-      Cookies.set('auth_token', token, { expires: 7 }); // Expires in 7 days
+        Cookies.set('auth_token', token, { expires: 7 });
 
-      // Format and store user info
-      const userData: User = {
-        name: response.username, // Use `username` from the response
-        email: response.email,
-        role: response.role,
-        id: response.id, // Added id property from response
-    };
+        const userData: User = {
+          name: response.username,
+          email: response.email,
+          role: response.role,
+          id: response.id,
+        };
 
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
-    return true;
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        return true;
       } else {
         throw new Error('Login failed - no token received');
       }
@@ -90,36 +84,38 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const signup = async (name: string, email: string, password: string): Promise<boolean> => {
+  const signup = async (name: string, email: string, password: string): Promise<any> => {
     setIsLoading(true);
     setError(null);
-    
     try {
       const response = await authApi.register(name, email, password);
-      
-      if (response.token) {
-        // Extract token (removing 'Bearer ' if present)
-        const token = response.token.startsWith('Bearer ') 
-          ? response.token.substring(7) 
-          : response.token;
-        
-        // Store registration token in a cookie
-        Cookies.set('reg_token', token, { expires: 1 }); // Expires in 1 day
-        
-        // Auto-login after successful signup
-        return await login(email, password, 'user');
-      } else if (response.success) {
-        // No token but success flag is true
-        return await login(email, password, 'user');
-      } else {
-        throw new Error('Signup failed');
+      // If backend returns a message, treat as success
+      if (response && typeof response === 'object' && 'message' in response && response.message) {
+        setIsLoading(false);
+        return { message: response.message };
       }
-    } catch (error) {
+      // If backend returns a token (legacy/auto-login)
+      if (response && response.token) {
+        const token = response.token.startsWith('Bearer ')
+          ? response.token.substring(7)
+          : response.token;
+        Cookies.set('reg_token', token, { expires: 1 });
+        setIsLoading(false);
+        // Optionally, auto-login here if you want
+        // return await login(email, password, 'user');
+        return { message: 'User registered successfully' };
+      }
+      setIsLoading(false);
+      return { message: 'Registration failed. Please try again.' };
+    } catch (error: any) {
       console.error('Signup error:', error);
       setError('Registration failed. Please try again.');
-      return false;
-    } finally {
       setIsLoading(false);
+      // Try to extract backend error message
+      if (error.response && error.response.data && error.response.data.message) {
+        return { message: error.response.data.message };
+      }
+      return { message: 'Registration failed. Please try again.' };
     }
   };
 

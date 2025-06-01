@@ -1,11 +1,11 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/components/Layout/MainLayout';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const Login = () => {
   const { user, login, isLoading, error: authError } = useAuth();
@@ -15,16 +15,46 @@ const Login = () => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus on email field
+  React.useEffect(() => {
+    if (emailRef.current) {
+      emailRef.current.focus();
+    }
+  }, []);
+
+  // Track failed attempts for lockout/rate limiting
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const MAX_ATTEMPTS = 5;
+  const LOCKOUT_TIME = 60 * 1000; // 1 minute
+  const lockoutTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Redirect if already logged in
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
 
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
+
+    if (!captchaToken) {
+      setFormError('Please complete the CAPTCHA.');
+      return;
+    }
+
+    if (isLocked) {
+      setFormError('Account temporarily locked due to too many failed attempts. Please try again later.');
+      return;
+    }
 
     if (!email || !password) {
       setFormError('Please fill in all fields');
@@ -32,22 +62,40 @@ const Login = () => {
     }
 
     try {
-      const success = await login(email, password, role);
-      
+      const success = await login(email, password, role, captchaToken);
       if (success) {
+        setFailedAttempts(0);
         toast({
           title: "Login successful!",
           description: "Welcome to the Grievance Management System",
         });
         navigate('/dashboard');
       } else {
-        setFormError(authError || 'Invalid credentials. Please try again.');
+        setFailedAttempts(prev => prev + 1);
+        if (failedAttempts + 1 >= MAX_ATTEMPTS) {
+          setIsLocked(true);
+          setFormError('Account temporarily locked due to too many failed attempts. Please try again in 1 minute.');
+          lockoutTimer.current = setTimeout(() => {
+            setIsLocked(false);
+            setFailedAttempts(0);
+          }, LOCKOUT_TIME);
+        } else {
+          setFormError(authError || 'Invalid credentials. Please try again.');
+        }
       }
     } catch (error) {
-      setFormError('An error occurred. Please try again.');
+      setFailedAttempts(prev => prev + 1);
+      setFormError('A network or server error occurred. Please try again.');
       console.error(error);
     }
   };
+
+  // Clean up lockout timer
+  React.useEffect(() => {
+    return () => {
+      if (lockoutTimer.current) clearTimeout(lockoutTimer.current);
+    };
+  }, []);
 
   return (
     <MainLayout>
@@ -62,8 +110,19 @@ const Login = () => {
           </div>
 
           {formError && (
-            <div className="bg-red-50 text-red-800 p-3 rounded-md mb-4 text-sm">
+            <div id="login-error" className="bg-red-50 text-red-800 p-3 rounded-md mb-4 text-sm" role="alert">
               {formError}
+              {failedAttempts > 0 && !isLocked && (
+                <div className="mt-1 text-xs text-red-600">Failed attempts: {failedAttempts} / {MAX_ATTEMPTS}</div>
+              )}
+            </div>
+          )}
+
+          {authError && !formError && (
+            <div className="bg-yellow-50 text-yellow-800 p-3 rounded-md mb-4 text-sm" role="alert">
+              {authError.includes('unauthorized')
+                ? 'Invalid credentials. Please check your email and password.'
+                : authError}
             </div>
           )}
 
@@ -73,11 +132,14 @@ const Login = () => {
               <input
                 id="email"
                 type="email"
+                ref={emailRef}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="form-input"
                 placeholder="your@email.com"
-                disabled={isLoading}
+                disabled={isLoading || isLocked}
+                aria-invalid={!!formError}
+                aria-describedby="login-error"
               />
             </div>
 
@@ -90,7 +152,9 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="form-input"
                 placeholder="********"
-                disabled={isLoading}
+                disabled={isLoading || isLocked}
+                aria-invalid={!!formError}
+                aria-describedby="login-error"
               />
             </div>
             <div className="form-input-wrapper">
@@ -120,6 +184,13 @@ const Login = () => {
                 </label>
               </div>
             </div>
+
+            <div className="mt-4">
+              <ReCAPTCHA
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY!}
+                onChange={handleCaptchaChange}
+              />
+            </div>
             <Button 
               type="submit" 
               className="w-full mt-6"
@@ -128,6 +199,7 @@ const Login = () => {
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
+
 
           <div className="mt-6 text-center text-sm">
             <p className="text-muted-foreground">
