@@ -204,6 +204,7 @@ const Dashboard = () => {
       {/* User summary row with call-to-action */}
       {user?.role !== 'admin' && (
         <>
+          <h2 className="text-xl font-bold mb-4 text-primary/90">User Analytics</h2>
           <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl shadow p-6 flex flex-col items-center border border-border">
               <ListChecks className="text-primary mb-2" size={36} />
@@ -221,21 +222,21 @@ const Dashboard = () => {
               <div className="text-muted-foreground">Resolved</div>
             </div>
           </div>
-          <div className="mb-10 flex flex-col md:flex-row gap-4 items-center justify-center">
+          {/* <div className="mb-10 flex flex-col md:flex-row gap-4 items-center justify-center">
             <Link to="/grievances/new" className="inline-block">
               <button className="bg-primary text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-primary/90 transition">+ Submit New Grievance</button>
             </Link>
             <Link to="/grievances" className="inline-block">
               <button className="bg-muted text-primary px-6 py-3 rounded-lg font-semibold shadow hover:bg-muted/80 border border-primary transition">View My Grievances</button>
             </Link>
-          </div>
+          </div> */}
         </>
       )}
 
       {/* Card grid remains for both roles */}
       <div className="mb-12">
-        <h2 className="text-xl font-bold mb-4 text-primary/90">Quick Actions & Stats</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <h2 className="text-xl font-bold mb-4 text-primary/90">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
           {cards.map((card, index) => (
             <Link to={card.link} key={index} className="focus:outline-none">
               <div className={`relative group rounded-2xl p-7 shadow-lg border border-border bg-gradient-to-br ${card.color} transition-transform duration-200 hover:scale-105 hover:shadow-2xl overflow-hidden`}>
