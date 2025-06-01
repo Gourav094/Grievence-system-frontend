@@ -33,8 +33,9 @@ const GrievanceList = () => {
         grievance.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         grievance.id?.toString().toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = currentStatus === 'all' || grievance.status === currentStatus;
 
+      const matchesStatus = currentStatus === 'all' || grievance.status === currentStatus;
+      console.log('Filtering grievances:', matchesSearch, matchesStatus, currentStatus, grievance);
       return matchesSearch && matchesStatus;
     });
   }, [grievances, searchTerm, currentStatus]);
@@ -74,7 +75,7 @@ const GrievanceList = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <input
               type="text"
-              placeholder="Search grievances..."
+              placeholder="Search grievances by title..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -89,8 +90,8 @@ const GrievanceList = () => {
               className="form-input py-2 px-3 rounded-md border border-border text-sm"
             >
               <option value="all">All Status</option>
-              <option value="open">Open</option>
-              <option value="in-progress">In Progress</option>
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
               <option value="resolved">Resolved</option>
               <option value="rejected">Rejected</option>
             </select>
