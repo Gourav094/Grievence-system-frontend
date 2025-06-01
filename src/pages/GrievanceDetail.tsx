@@ -47,11 +47,7 @@ const GrievanceDetail = () => {
   // Status update mutation
   const updateStatusMutation = useMutation({
     mutationFn: (newStatus: GrievanceStatus) => {
-      return grievanceApi.createGrievance({ 
-        ...grievance,
-        id: grievance.id,
-        status: newStatus 
-      });
+      return grievanceApi.updateGrievance(grievance.id, { status: newStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['grievance', id] });
