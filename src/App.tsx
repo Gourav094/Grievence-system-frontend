@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +16,8 @@ import GrievanceDetail from "./pages/GrievanceDetail";
 import GrievanceTrack from "./pages/GrievanceTrack";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
+import UserList from "./pages/UserList";
+import UserDetail from "./pages/UserDetail";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,8 @@ const App = () => (
             <Route path="/grievances/new" element={<GrievanceForm />} />
             <Route path="/grievances/:id" element={<GrievanceDetail />} />
             <Route path="/grievances/track" element={<GrievanceTrack />} />
+            <Route path="/user-list" element={<UserList />} />
+            <Route path="/user/:id" element={<UserDetail />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

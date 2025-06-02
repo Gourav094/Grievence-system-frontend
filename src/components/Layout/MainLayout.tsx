@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -30,8 +29,8 @@ const MainLayout = ({
     return <Navigate to="/login" replace />;
   }
 
-  // If user is logged in but not allowed based on role
-  if (user && requireAuth && !allowedRoles.includes(user.role)) {
+  // If user is logged in but not allowed based on role (case-insensitive for admin)
+  if (user && requireAuth && !allowedRoles.map(r => r.toLowerCase()).includes(user.role?.toLowerCase())) {
     return <Navigate to="/unauthorized" replace />;
   }
 

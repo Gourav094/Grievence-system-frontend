@@ -166,10 +166,22 @@ export const grievanceApi = {
 export const adminApi = {
   getAllUsers: async () => {
     try {
-      const response = await api.post('/api/admin/users');
+      const response = await api.get('/api/admin/users');
       return response.data;
     } catch (error) {
       console.error('Error fetching users:', error);
+      throw error;
+    }
+  },
+
+  // Add API to get all admins
+  getAllAdmins: async () => {
+    try {
+      const response = await api.get('/api/admin/users');
+      // Filter users with role 'admin' or 'ADMIN'
+      return response.data.filter((u: any) => u.role?.toLowerCase() === 'admin');
+    } catch (error) {
+      console.error('Error fetching admins:', error);
       throw error;
     }
   },

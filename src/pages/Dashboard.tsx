@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import MainLayout from '@/components/Layout/MainLayout';
 import { 
@@ -36,6 +36,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   // Use React Query for grievances
   const {
     data: grievances = [],
@@ -150,11 +151,21 @@ const Dashboard = () => {
   const [assignLoading, setAssignLoading] = useState(false);
   const [assignError, setAssignError] = useState('');
 
-  // Dummy admin list for assignment (replace with real API in production)
-  const adminList = [
-    { name: 'John Doe', email: 'john@example.com' },
-    { name: 'Jane Smith', email: 'jane@example.com' },
-  ];
+  // Replace dummy adminList with real API call and state
+  const [adminList, setAdminList] = useState([]);
+  const [adminLoading, setAdminLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (user?.role && user.role.toLowerCase() === 'admin') {
+      setAdminLoading(true);
+      import('@/services/api').then(({ adminApi }) => {
+        adminApi.getAllAdmins()
+          .then(setAdminList)
+          .catch(() => setAdminList([]))
+          .finally(() => setAdminLoading(false));
+      });
+    }
+  }, [user]);
 
   // Assign handler (replace with real API call)
   const handleAssign = async () => {
@@ -181,7 +192,7 @@ const Dashboard = () => {
   };
 
   return (
-    <MainLayout requireAuth>
+    <MainLayout requireAuth allowedRoles={["admin", "user"]}>
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-extrabold mb-2 tracking-tight text-primary drop-shadow">Welcome, {user?.name}</h1>
         <p className="text-lg text-muted-foreground mb-2">
@@ -259,6 +270,13 @@ const Dashboard = () => {
               </div>
             </Link>
           ))}
+          {/* Only show Manage Users card to admin */}
+          {user?.role === 'admin' && (
+            <div className="card bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-md rounded-lg p-6 hover:shadow-lg hover:scale-105 transition-transform duration-300 cursor-pointer" onClick={() => navigate('/user-list')}>
+              <h2 className="text-xl font-bold mb-2">Manage Users</h2>
+              <p>View and manage all users</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -393,24 +411,33 @@ const Dashboard = () => {
       <Dialog open={assignModalOpen} onOpenChange={setAssignModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Assign Grievance</DialogTitle>
+            <DialogTitle>
+              Assign Grievance
+              {selectedGrievance && (
+                <span className="text-muted-foreground text-sm ml-2">#{selectedGrievance.id}</span>
+              )}
+            </DialogTitle>
             <DialogDescription>
               Assign this grievance to an admin for resolution.
             </DialogDescription>
           </DialogHeader>
           <div className="mb-4">
-            <div className="font-semibold mb-2">Grievance: <span className="text-primary">{selectedGrievance?.title}</span></div>
+            <div className="font-semibold mb-2">Grievance:<span className="text-primary">{selectedGrievance?.title}</span></div>
             <label className="block mb-2 text-sm">Assign to:</label>
-            <select
-              className="w-full border rounded px-3 py-2"
-              value={assignTo}
-              onChange={e => setAssignTo(e.target.value)}
-            >
-              <option value="">Select admin</option>
-              {adminList.map(admin => (
-                <option key={admin.email} value={admin.name}>{admin.name}</option>
-              ))}
-            </select>
+            {adminLoading ? (
+              <div className="text-muted-foreground text-sm py-2">Loading admins...</div>
+            ) : (
+              <select
+                className="w-full border rounded px-3 py-2"
+                value={assignTo}
+                onChange={e => setAssignTo(e.target.value)}
+              >
+                <option value="">Select admin</option>
+                {adminList.map(admin => (
+                  <option key={admin.id} value={admin.username}>{admin.username}</option>
+                ))}
+              </select>
+            )}
             {assignError && <div className="text-red-600 text-xs mt-2">{assignError}</div>}
           </div>
           <DialogFooter>
