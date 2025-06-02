@@ -20,7 +20,7 @@ import {
   getGrievancesByUser 
 } from '@/services/grievanceService';
 import { grievanceApi } from '@/services/api';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,7 @@ import { useToast } from '@/hooks/use-toast';
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   // Use React Query for grievances
   const {
     data: grievances = [],
@@ -47,6 +48,10 @@ const Dashboard = () => {
         ? grievanceApi.getAllGrievances()
         : grievanceApi.getAllGrievances(user?.name),
     enabled: !!user,
+    staleTime: 1000 * 60 * 3, // Cache data for 5 minutes
+    refetchOnWindowFocus: true, // Refetch data when the window regains focus
+    refetchOnReconnect: true, 
+    retry: 0 // Disable automatic retries
   });
 
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -163,7 +168,7 @@ const Dashboard = () => {
       setAssignTo('');
       setSelectedGrievance(null);
       // Optionally refetch grievances or show a toast
-
+      queryClient.invalidateQueries({ queryKey: ['grievances'] });
       toast({
         description: `Grievance has been successfully assigned to ${assignTo}.`,
       });

@@ -24,7 +24,10 @@ const GrievanceList = () => {
         ? grievanceApi.getAllGrievances() // admin: fetch all
         : grievanceApi.getAllGrievances(user.name), // user: only their grievances
     enabled: !!user,
-    retry: 0,
+    staleTime: 1000 * 60 * 3, // Cache data for 5 minutes
+    refetchOnWindowFocus: true, // Refetch data when the window regains focus
+    refetchOnReconnect: true, 
+    retry: 0 // Disable automatic retries
   });
 
   const filteredGrievances = useMemo(() => {
