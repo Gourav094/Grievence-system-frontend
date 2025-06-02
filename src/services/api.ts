@@ -96,35 +96,34 @@ export const grievanceApi = {
   },
   
   addComment: async (commentData: any) => {
-    try {
-      const { grievanceId, ...rest } = commentData;
-      const response = await api.post(`/api/comments?grievanceId=${grievanceId}`, rest);
-      return response.data;
-    } catch (error) {
-      console.error('Error adding comment:', error);
-      throw error;
-    }
-  },
+  try {
+    const response = await api.post('/api/comments', commentData);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    throw error;
+  }
+},
   
-  updateComment: async ({ id, text }: { id: string; text: string }) => {
-    try {
-      const response = await api.put(`/api/comments/${id}`, { comment: text });
-      return response.data;
-    } catch (error) {
-      console.error(`Error updating comment ${id}:`, error);
-      throw error;
-    }
-  },
+ updateComment: async ({ id, text }) => {
+  try {
+    const response = await api.put(`/api/comments/${id}`, { comment: text });
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating comment ${id}:`, error);
+    throw error;
+  }
+},
 
-  deleteComment: async (id: string) => {
-    try {
-      const response = await api.delete(`/api/comments/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error deleting comment ${id}:`, error);
-      throw error;
-    }
-  },
+ deleteComment: async (id) => {
+  try {
+    const response = await api.delete(`/api/comments/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting comment ${id}:`, error);
+    throw error;
+  }
+},
 
   searchGrievances: async (query: string) => {
     try {

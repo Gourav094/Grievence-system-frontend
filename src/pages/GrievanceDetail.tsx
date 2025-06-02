@@ -318,28 +318,57 @@ const GrievanceDetail = () => {
 
           {/* Comments Section */}
           <div className="mt-8 pt-6 border-t border-border">
-            <h2 className="text-lg font-medium mb-4 flex items-center">
+          
+
+            {/* Add Comment Form */}
+            <form onSubmit={handleAddComment}>
+              <div className="form-input-wrapper">
+                <label htmlFor="comment" className="form-label">Add a Comment</label>
+                <textarea
+                  id="comment"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="form-input min-h-[100px]"
+                  placeholder="Type your comment here..."
+                  disabled={addCommentMutation.isPending}
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={!comment.trim() || addCommentMutation.isPending}
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  {addCommentMutation.isPending ? 'Sending...' : 'Send Comment'}
+                </Button>
+              </div>
+            </form>
+          </div>
+
+          <hr className="my-6 border-border" />
+          <h2 className="text-lg font-medium mb-4 flex items-center">
               <MessageSquare className="mr-2 h-5 w-5" />
               Comments & Updates
             </h2>
 
-            <div className="space-y-6 mb-10 w-full mx-auto">
-              {grievance.comments && grievance.comments.length > 0 ? (
-                grievance.comments.map((comment: any) => {
+          <div className="space-y-6 mb-10 w-full mx-auto mt-5">
+                {grievance.comments && grievance.comments.length > 0 ? (
+                [...grievance.comments].reverse().map((comment: any) => {
                   const isCurrentUser = user?.name === comment.userName;
                   return (
-                    <div
-                      key={comment.commentId}
-                      className={`flex items-start gap-4 bg-white rounded-xl border shadow-md p-5 transition-all duration-150 relative hover:shadow-lg ${
-                        comment.isAdmin
-                          ? 'border-primary/40'
-                          : isCurrentUser
-                            ? 'border-blue-200'
-                            : 'border-border'
-                      }`}
-                      style={{ minHeight: 96, marginBottom: 16 }}
-                    >
-                      {/* Avatar/Initials */}
+                  <div
+                    key={comment.commentId}
+                    className={`flex items-start gap-4 bg-white rounded-xl border shadow-md p-5 transition-all duration-150 relative hover:shadow-lg ${
+                    comment.isAdmin
+                      ? 'border-primary/40'
+                      : isCurrentUser
+                      ? 'border-blue-200'
+                      : 'border-border'
+                    }`}
+                    style={{ minHeight: 96, marginBottom: 16 }}
+                  >
+                    {/* Avatar/Initials */}
                       <div className="flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-gray-200 to-gray-100 flex items-center justify-center font-bold text-lg text-primary border border-gray-300 shadow-sm">
                         {comment.userName ? comment.userName[0].toUpperCase() : '?'}
                       </div>
@@ -401,35 +430,11 @@ const GrievanceDetail = () => {
                 </div>
               )}
             </div>
-
-            {/* Add Comment Form */}
-            <form onSubmit={handleAddComment}>
-              <div className="form-input-wrapper">
-                <label htmlFor="comment" className="form-label">Add a Comment</label>
-                <textarea
-                  id="comment"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  className="form-input min-h-[100px]"
-                  placeholder="Type your comment here..."
-                  disabled={addCommentMutation.isPending}
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={!comment.trim() || addCommentMutation.isPending}
-                >
-                  <Send className="mr-2 h-4 w-4" />
-                  {addCommentMutation.isPending ? 'Sending...' : 'Send Comment'}
-                </Button>
-              </div>
-            </form>
-          </div>
         </div>
+        
       </div>
 
+            
       {/* Delete confirmation dialog */}
       <Dialog open={!!deleteConfirmId} onOpenChange={cancelDelete}>
         <DialogContent>
