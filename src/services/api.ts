@@ -4,7 +4,7 @@ import { updateGrievance } from './grievanceService';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_BACKEND_API || 'http://localhost:5000',
   headers: {
     'Content-Type': 'application/json',
   },

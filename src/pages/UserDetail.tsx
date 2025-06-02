@@ -20,7 +20,7 @@ const UserDetail = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/admin/users/${id}`);
+        const response = await axios.get(`process.env.VITE_BACKEND_API/api/admin/users/${id}`);
         setUser(response.data);
         setUpdatedUser(response.data);
       } catch (error) {
@@ -38,7 +38,7 @@ const UserDetail = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`http://localhost:8080/api/admin/users/${id}`, updatedUser);
+      await axios.put(`process.env.VITE_BACKEND_API/api/admin/users/${id}`, updatedUser);
       toast({
         title: 'User updated successfully',
       });
@@ -53,7 +53,7 @@ const UserDetail = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:8080/api/admin/users/${id}`);
+      await axios.delete(`process.env.VITE_BACKEND_API/api/admin/users/${id}`);
       toast({
         title: 'User deleted successfully',
       });

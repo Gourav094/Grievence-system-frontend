@@ -34,7 +34,7 @@ const UserList = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/admin/users');
+        const response = await axios.get(`process.env.VITE_BACKEND_API/api/admin/users`);
         // Only show users with role 'USER'
         setUsers(response.data.filter((u) => u.role.toLowerCase() === 'user'));
       } catch (error) {
@@ -53,7 +53,7 @@ const UserList = () => {
     setDialogLoading(true);
     setDialogOpen(true);
     try {
-      const response = await axios.get(`http://localhost:8080/api/admin/users/${id}`);
+      const response = await axios.get(`process.env.VITE_BACKEND_API/api/admin/users/${id}`);
       setSelectedUser(response.data);
     } catch (error) {
       toast({
@@ -71,7 +71,7 @@ const UserList = () => {
     setEditLoading(true);
     try {
       // Fetch full user details including password
-      const response = await axios.get(`http://localhost:8080/api/admin/users/${user.id}`);
+      const response = await axios.get(`process.env.VITE_BACKEND_API/api/admin/users/${user.id}`);
       const userDetails = response.data;
       setEditForm({
         username: userDetails.username,
@@ -98,7 +98,7 @@ const UserList = () => {
         role: editForm.role.toLowerCase(),
         password: editForm.password, // always send password, but do not allow editing
       };
-      await axios.put(`http://localhost:8080/api/admin/users/${editUser.id}`, payload);
+      await axios.put(`process.env.VITE_BACKEND_API/api/admin/users/${editUser.id}`, payload);
       toast({ title: 'User updated successfully' });
       setUsers((prev) => prev.map((u) => (u.id === editUser.id ? { ...u, ...payload } : u)));
       setEditDialogOpen(false);
@@ -118,7 +118,7 @@ const UserList = () => {
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
     try {
-      await axios.delete(`http://localhost:8080/api/admin/users/${userToDelete.id}`);
+      await axios.delete(`process.env.VITE_BACKEND_API/api/admin/users/${userToDelete.id}`);
       toast({ title: 'User deleted successfully' });
       setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
       setDeleteDialogOpen(false);

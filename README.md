@@ -55,7 +55,7 @@ yarn dev
 ```
 
 4. **Open your browser**
-Navigate to `http://localhost:8080` to view the application.
+Navigate to `VITE_BACKEND_API` to view the application.
 
 ## 📱 Usage
 
