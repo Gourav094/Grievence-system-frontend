@@ -24,6 +24,7 @@ const GrievanceList = () => {
         ? grievanceApi.getAllGrievances() // admin: fetch all
         : grievanceApi.getAllGrievances(user.name), // user: only their grievances
     enabled: !!user,
+    retry: 0,
   });
 
   const filteredGrievances = useMemo(() => {
