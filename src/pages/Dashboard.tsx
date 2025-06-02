@@ -203,7 +203,7 @@ const Dashboard = () => {
 
       {user?.role !== 'admin' && (
         <>
-          {/* User summary row with call-to-action */}
+          <h2 className="text-xl font-bold mb-4 text-primary/90">User Analytics</h2>
           <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl shadow p-6 flex flex-col items-center border border-border">
               <ListChecks className="text-primary mb-2" size={36} />
@@ -221,108 +221,41 @@ const Dashboard = () => {
               <div className="text-muted-foreground">Resolved</div>
             </div>
           </div>
-          {/* Enhanced CTA section */}
-          <div className="mb-10 flex flex-col md:flex-row gap-4 items-center justify-center">
-            <Link to="/grievances/new" className="inline-block w-full md:w-auto">
-              <button className="bg-primary text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-primary/90 transition w-full md:w-auto flex items-center justify-center gap-2">
-                <FileText size={20} /> Submit New Grievance
-              </button>
-            </Link>
-            <Link to="/grievances" className="inline-block w-full md:w-auto">
-              <button className="bg-muted text-primary px-6 py-3 rounded-lg font-semibold shadow hover:bg-muted/80 border border-primary transition w-full md:w-auto flex items-center justify-center gap-2">
-                <ListChecks size={20} /> View My Grievances
-              </button>
+          {/* <div className="mb-10 flex flex-col md:flex-row gap-4 items-center justify-center">
+            <Link to="/grievances/new" className="inline-block">
+              <button className="bg-primary text-white px-6 py-3 rounded-lg font-semibold shadow hover:bg-primary/90 transition">+ Submit New Grievance</button>
             </Link>
             <Link to="/grievances/track" className="inline-block w-full md:w-auto">
               <button className="bg-purple-100 text-purple-700 px-6 py-3 rounded-lg font-semibold shadow hover:bg-purple-200 border border-purple-400 transition w-full md:w-auto flex items-center justify-center gap-2">
                 <Search size={20} /> Track Status
               </button>
             </Link>
-          </div>
-          {/* Recent grievances table for user */}
-          <div className="mb-12">
-            <h2 className="text-lg font-bold mb-4 text-primary/90">Recent Grievances</h2>
-            <div className="bg-white rounded-xl shadow border border-border overflow-x-auto">
-              {isLoading ? (
-                <div className="p-8 text-center text-lg">Loading your grievances...</div>
-              ) : error ? (
-                <div className="p-8 text-center text-red-600">Failed to load grievances.</div>
-              ) : (
-                <table className="w-full text-left min-w-[700px]">
-                  <thead>
-                    <tr className="bg-muted text-muted-foreground text-sm">
-                      <th className="px-4 py-3 font-semibold">ID</th>
-                      <th className="px-4 py-3 font-semibold">Title</th>
-                      <th className="px-4 py-3 font-semibold">Status</th>
-                      <th className="px-4 py-3 font-semibold">Created</th>
-                      <th className="px-4 py-3 font-semibold">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...filteredGrievances]
-                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                      .slice(0, 5)
-                      .map((grievance) => (
-                        <tr key={grievance.id} className="border-b border-border hover:bg-blue-50 transition">
-                          <td className="px-4 py-3 font-mono text-xs">{grievance.id}</td>
-                          <td className="px-4 py-3 font-medium max-w-[200px] truncate">{grievance.title}</td>
-                          <td className="px-4 py-3">
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-semibold 
-                              ${grievance.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : ''}
-                              ${grievance.status === 'in-progress' ? 'bg-blue-100 text-blue-800' : ''}
-                              ${grievance.status === 'resolved' ? 'bg-green-100 text-green-800' : ''}
-                              ${grievance.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
-                            `}>
-                              {grievance.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-xs">{new Date(grievance.createdAt).toLocaleDateString()}</td>
-                          <td className="px-4 py-3 flex gap-2">
-                            <Link to={`/grievances/${grievance.id}`} className="text-primary hover:scale-110 transition" title="View">
-                              <Eye size={20} />
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    {filteredGrievances.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                          No grievances found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
+          </div> */}
         </>
       )}
 
-      {/* Removed old Quick Actions & Stats card grid for normal users as requested */}
-      {user?.role === 'admin' && (
-        <div className="mb-12">
-          <h2 className="text-xl font-bold mb-4 text-primary/90">Quick Actions & Stats</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {cards.map((card, index) => (
-              <Link to={card.link} key={index} className="focus:outline-none">
-                <div className={`relative group rounded-2xl p-7 shadow-lg border border-border bg-gradient-to-br ${card.color} transition-transform duration-200 hover:scale-105 hover:shadow-2xl overflow-hidden`}>
-                  <div className="absolute right-4 top-4 opacity-10 text-[80px] pointer-events-none select-none">
-                    {card.icon}
-                  </div>
-                  <div className="relative z-10 flex flex-col items-start">
-                    <div className="mb-4 flex items-center justify-center w-12 h-12 rounded-full bg-white/80 shadow">
-                      {React.cloneElement(card.icon, { size: 32, className: 'text-primary' })}
-                    </div>
-                    <h3 className="text-2xl font-bold mb-1 text-white drop-shadow-lg">{card.title}</h3>
-                    <p className="text-white/90 text-base font-medium drop-shadow">{card.description}</p>
-                  </div>
+      {/* Card grid remains for both roles */}
+      <div className="mb-12">
+        <h2 className="text-xl font-bold mb-4 text-primary/90">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+          {cards.map((card, index) => (
+            <Link to={card.link} key={index} className="focus:outline-none">
+              <div className={`relative group rounded-2xl p-7 shadow-lg border border-border bg-gradient-to-br ${card.color} transition-transform duration-200 hover:scale-105 hover:shadow-2xl overflow-hidden`}>
+                <div className="absolute right-4 top-4 opacity-10 text-[80px] pointer-events-none select-none">
+                  {card.icon}
                 </div>
-              </Link>
-            ))}
-          </div>
+                <div className="relative z-10 flex flex-col items-start">
+                  <div className="mb-4 flex items-center justify-center w-12 h-12 rounded-full bg-white/80 shadow">
+                    {React.cloneElement(card.icon, { size: 32, className: 'text-primary' })}
+                  </div>
+                  <h3 className="text-2xl font-bold mb-1 text-white drop-shadow-lg">{card.title}</h3>
+                  <p className="text-white/90 text-base font-medium drop-shadow">{card.description}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Admin: Modern Grievance Table with Filters and Actions */}
       {user?.role === 'admin' && (

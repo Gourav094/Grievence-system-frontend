@@ -39,6 +39,9 @@ const Login = () => {
   }
 
   const handleCaptchaChange = (token: string | null) => {
+    if (!token) {
+      setFormError('CAPTCHA expired. Please try again.');
+    }
     setCaptchaToken(token);
   };
 
@@ -222,8 +225,8 @@ const Login = () => {
               </div>
               <div className="bg-muted p-2 rounded">
                 <p className="font-semibold">User</p>
-                <p>user@google.com</p>
-                <p>user123</p>
+                <p>user@gmail.com</p>
+                <p>user</p>
               </div>
             </div>
           </div>
